@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BloxTalk — The Roblox Community Forum</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #E8412A;
+    --red-dark: #C02E1B;
+    --red-light: #FDECEA;
+    --yellow: #FFD046;
+    --yellow-dark: #E6A800;
+    --teal: #00B89C;
+    --teal-light: #E0F7F4;
+    --dark: #1A1A2E;
+    --dark2: #16213E;
+    --dark3: #0F3460;
+    --mid: #2A2A45;
+    --muted: #8888AA;
+    --white: #FFFFFF;
+    --off: #F4F2EE;
+    --border: rgba(255,255,255,0.08);
+    --font-display: 'Baloo 2', cursive;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  /* ── PIXEL GRID BACKGROUND ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 32px 32px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5%;
+    height: 64px;
+    background: rgba(26,26,46,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--red); }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--white); }
+
+  .nav-cta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .btn {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 22px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.15s, opacity 0.15s;
+    display: inline-block;
+  }
+  .btn:hover { transform: translateY(-1px); opacity: 0.92; }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .btn-ghost:hover { color: var(--white); border-color: rgba(255,255,255,0.3); }
+
+  .btn-red {
+    background: var(--red);
+    color: var(--white);
+    box-shadow: 0 4px 16px rgba(232,65,42,0.35);
+  }
+
+  .btn-yellow {
+    background: var(--yellow);
+    color: #1A1A00;
+    box-shadow: 0 4px 16px rgba(255,208,70,0.3);
+  }
+
+  .btn-lg {
+    font-size: 16px;
+    padding: 14px 34px;
+    border-radius: 10px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 92vh;
+    display: flex;
+    align-items: center;
+    padding: 80px 5% 60px;
+    overflow: hidden;
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(232,65,42,0.18) 0%, transparent 70%);
+    top: -200px;
+    right: -100px;
+    pointer-events: none;
+  }
+  .hero-glow2 {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,184,156,0.12) 0%, transparent 70%);
+    bottom: -100px;
+    left: 20%;
+    pointer-events: none;
+  }
+
+  .hero-content {
+    max-width: 640px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255,208,70,0.1);
+    border: 1px solid rgba(255,208,70,0.25);
+    border-radius: 99px;
+    padding: 5px 14px 5px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--yellow);
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .badge-dot {
+    width: 8px; height: 8px;
+    background: var(--yellow);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 6vw, 72px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 .accent { color: var(--red); }
+  h1 .accent2 { color: var(--yellow); }
+
+  .hero-sub {
+    font-size: 18px;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 500px;
+    margin-bottom: 36px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 56px;
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+  }
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── FLOATING CARDS (hero right) ── */
+  .hero-cards {
+    position: absolute;
+    right: 5%;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 2;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .float-card {
+    background: var(--mid);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    padding: 14px 18px;
+    width: 300px;
+    transition: transform 0.3s;
+  }
+  .float-card:hover { transform: translateX(-4px); }
+
+  .float-card-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    font-weight: 800;
+    font-family: var(--font-display);
+    flex-shrink: 0;
+  }
+  .av-red { background: rgba(232,65,42,0.2); color: var(--red); }
+  .av-teal { background: rgba(0,184,156,0.2); color: var(--teal); }
+  .av-yellow { background: rgba(255,208,70,0.2); color: var(--yellow-dark); }
+
+  .fc-user { font-size: 13px; font-weight: 600; }
+  .fc-meta { font-size: 11px; color: var(--muted); }
+  .fc-title { font-size: 14px; font-weight: 500; color: var(--white); margin-bottom: 6px; line-height: 1.4; }
+  .fc-footer { display: flex; gap: 14px; align-items: center; }
+  .fc-tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+  .tag-dev { background: rgba(0,184,156,0.15); color: var(--teal); }
+  .tag-disc { background: rgba(255,208,70,0.15); color: var(--yellow-dark); }
+  .tag-help { background: rgba(232,65,42,0.15); color: var(--red); }
+  .tag-off { background: rgba(136,136,170,0.15); color: var(--muted); }
+
+  .fc-votes { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 4px; margin-left: auto; }
+
+  /* ── CATEGORIES ── */
+  .section {
+    position: relative;
+    z-index: 1;
+    padding: 80px 5%;
+  }
+
+  .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 10px;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 4vw, 44px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    margin-bottom: 14px;
+  }
+
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    margin-bottom: 48px;
+    max-width: 500px;
+  }
+
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .cat-card {
+    background: var(--mid);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 24px 22px;
+    text-decoration: none;
+    color: var(--white);
+    display: block;
+    transition: transform 0.2s, border-color 0.2s, background 0.2s;
+    cursor: pointer;
+  }
+  .cat-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255,255,255,0.14);
+    background: #32324e;
+  }
+  .cat-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    margin-bottom: 14px;
+  }
+  .ci-red { background: rgba(232,65,42,0.18); }
+  .ci-teal { background: rgba(0,184,156,0.18); }
+  .ci-yellow { background: rgba(255,208,70,0.18); }
+  .ci-blue { background: rgba(60,130,246,0.18); }
+  .ci-purple { background: rgba(148,100,246,0.18); }
+  .ci-pink { background: rgba(236,72,153,0.18); }
+
+  .cat-name {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+  .cat-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+  .cat-count { font-size: 12px; color: var(--muted); }
+  .cat-count strong { color: var(--white); font-weight: 600; }
+
+  /* ── TRENDING ── */
+  .section-dark {
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .trending-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .thread-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: var(--white);
+    transition: background 0.15s;
+    cursor: pointer;
+  }
+  .thread-row:hover { background: rgba(255,255,255,0.04); }
+
+  .thread-num {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.1);
+    min-width: 30px;
+  }
+  .thread-av {
+    width: 40px; height: 40px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800;
+    font-family: var(--font-display);
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .thread-body { flex: 1; min-width: 0; }
+  .thread-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .thread-meta { font-size: 12px; color: var(--muted); display: flex; gap: 12px; }
+  .thread-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .reply-count {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--white);
+  }
+  .reply-label { font-size: 11px; color: var(--muted); }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 20px;
+  }
+
+  .feat-card {
+    background: var(--mid);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 28px 24px;
+  }
+  .feat-icon {
+    font-size: 28px;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .feat-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .feat-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── CTA BANNER ── */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    padding: 80px 5%;
+    text-align: center;
+    overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(232,65,42,0.15) 0%, rgba(0,184,156,0.1) 100%);
+    border-top: 1px solid rgba(232,65,42,0.2);
+    border-bottom: 1px solid rgba(0,184,156,0.15);
+  }
+  .cta-content { position: relative; z-index: 1; }
+  .cta-section h2 { font-size: clamp(32px, 5vw, 56px); margin-bottom: 16px; }
+  .cta-section p { font-size: 18px; color: var(--muted); margin-bottom: 36px; }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    background: var(--dark2);
+    border-top: 1px solid var(--border);
+    padding: 48px 5% 32px;
+  }
+  .footer-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .footer-brand p { font-size: 14px; color: var(--muted); margin-top: 10px; max-width: 260px; line-height: 1.6; }
+  .footer-links h4 { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .footer-links ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .footer-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--white); }
+  .footer-bottom { border-top: 1px solid var(--border); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .footer-bottom p { font-size: 13px; color: var(--muted); }
+  .disclaimer { font-size: 12px; color: rgba(136,136,170,0.6); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 900px) {
+    .hero-cards { display: none; }
+    .hero-content { max-width: 100%; }
+    .nav-links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Blox<span>Talk</span></a>
+  <ul class="nav-links">
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#trending">Trending</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#">Leaderboard</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn btn-ghost">Sign in</a>
+    <a href="#" class="btn btn-red">Join Free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      12,480 players online now
+    </div>
+
+    <h1>The forum<br>built for <span class="accent">Roblox</span><br><span class="accent2">obsessives.</span></h1>
+
+    <p class="hero-sub">
+      Discuss games, share dev tips, trade items, and connect with the community — all in one place designed for real Roblox fans.
+    </p>
+
+    <div class="hero-actions">
+      <a href="#" class="btn btn-yellow btn-lg">Join the community</a>
+      <a href="#categories" class="btn btn-ghost btn-lg">Browse forums</a>
+    </div>
+
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">284K</div>
+        <div class="stat-label">Members</div>
+      </div>
+      <div>
+        <div class="stat-num">1.9M</div>
+        <div class="stat-label">Posts</div>
+      </div>
+      <div>
+        <div class="stat-num">47K</div>
+        <div class="stat-label">Threads</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating thread previews -->
+  <div class="hero-cards">
+    <div class="float-card">
+      <div class="float-card-top">
+        <div class="avatar av-red">RX</div>
+        <div>
+          <div class="fc-user">RedXenon</div>
+          <div class="fc-meta">2 min ago</div>
+        </div>
+      </div>
+      <div class="fc-title">Best obby games to grind in 2025? My top 5 picks</div>
+      <div class="fc-footer">
+        <span class="fc-tag tag-disc">Discussion</span>
+        <span class="fc-votes">▲ 142 upvotes</span>
+      </div>
+    </div>
+
+    <div class="float-card">
+      <div class="float-card-top">
+        <div class="avatar av-teal">BL</div>
+        <div>
+          <div class="fc-user">BuilderLucy</div>
+          <div class="fc-meta">8 min ago</div>
+        </div>
+      </div>
+      <div class="fc-title">Free open-source Lua pathfinding module — link inside</div>
+      <div class="fc-footer">
+        <span class="fc-tag tag-dev">Dev Hub</span>
+        <span class="fc-votes">▲ 89 upvotes</span>
+      </div>
+    </div>
+
+    <div class="float-card">
+      <div class="float-card-top">
+        <div class="avatar av-yellow">NV</div>
+        <div>
+          <div class="fc-user">NovaBrix</div>
+          <div class="fc-meta">15 min ago</div>
+        </div>
+      </div>
+      <div class="fc-title">Anyone else think the new avatar editor update is mid?</div>
+      <div class="fc-footer">
+        <span class="fc-tag tag-off">Off-topic</span>
+        <span class="fc-votes">▲ 61 upvotes</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" id="categories">
+  <div class="section-label">Browse Topics</div>
+  <h2>Find your community</h2>
+  <p class="section-sub">Every corner of Roblox covered — from building to trading, news to nostalgia.</p>
+
+  <div class="categories-grid">
+    <div class="cat-card">
+      <div class="cat-icon ci-red">🎮</div>
+      <div class="cat-name">Game Discussion</div>
+      <div class="cat-desc">Reviews, rankings, recommendations and rants about your favourite experiences.</div>
+      <div class="cat-count"><strong>14,200</strong> threads · <strong>89K</strong> posts</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon ci-teal">🛠️</div>
+      <div class="cat-name">Dev Hub</div>
+      <div class="cat-desc">Scripting help, building tips, game design, and Roblox Studio tutorials.</div>
+      <div class="cat-count"><strong>9,800</strong> threads · <strong>62K</strong> posts</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon ci-yellow">💰</div>
+      <div class="cat-name">Trading Post</div>
+      <div class="cat-desc">Buy, sell, and trade limited items. Price checks, value discussions, and scam alerts.</div>
+      <div class="cat-count"><strong>7,400</strong> threads · <strong>41K</strong> posts</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon ci-blue">📰</div>
+      <div class="cat-name">News & Updates</div>
+      <div class="cat-desc">Platform announcements, patch notes, and community reactions to Roblox news.</div>
+      <div class="cat-count"><strong>3,100</strong> threads · <strong>28K</strong> posts</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon ci-purple">🏆</div>
+      <div class="cat-name">Clans & Groups</div>
+      <div class="cat-desc">Recruiting, group rankings, clan wars, and official group announcement boards.</div>
+      <div class="cat-count"><strong>5,600</strong> threads · <strong>33K</strong> posts</div>
+    </div>
+    <div class="cat-card">
+      <div class="cat-icon ci-pink">💬</div>
+      <div class="cat-name">Off-Topic Lounge</div>
+      <div class="cat-desc">Memes, introductions, polls, and everything else that doesn't fit anywhere else.</div>
+      <div class="cat-count"><strong>11,900</strong> threads · <strong>95K</strong> posts</div>
+    </div>
+  </div>
+</section>
+
+<!-- TRENDING -->
+<section class="section section-dark" id="trending">
+  <div class="section-label">Hot Right Now</div>
+  <h2>Trending threads</h2>
+  <p class="section-sub">What the community is talking about this week.</p>
+
+  <div class="trending-list">
+    <div class="thread-row">
+      <div class="thread-num">01</div>
+      <div class="thread-av" style="background:rgba(232,65,42,0.2);color:var(--red);">SK</div>
+      <div class="thread-body">
+        <div class="thread-title">Roblox just silently raised Premium prices — here's what we know</div>
+        <div class="thread-meta"><span>by SkyKid99</span><span>in News & Updates</span><span>3 hours ago</span></div>
+      </div>
+      <div class="thread-right">
+        <div class="reply-count">412</div>
+        <div class="reply-label">replies</div>
+      </div>
+    </div>
+
+    <div class="thread-row">
+      <div class="thread-num">02</div>
+      <div class="thread-av" style="background:rgba(0,184,156,0.2);color:var(--teal);">GL</div>
+      <div class="thread-body">
+        <div class="thread-title">I made a full open-world RPG solo in 6 months — here's my devlog</div>
+        <div class="thread-meta"><span>by GlitchLab</span><span>in Dev Hub</span><span>1 day ago</span></div>
+      </div>
+      <div class="thread-right">
+        <div class="reply-count">287</div>
+        <div class="reply-label">replies</div>
+      </div>
+    </div>
+
+    <div class="thread-row">
+      <div class="thread-num">03</div>
+      <div class="thread-av" style="background:rgba(255,208,70,0.2);color:var(--yellow-dark);">MM</div>
+      <div class="thread-body">
+        <div class="thread-title">Dominus Frigidus just hit 2M Robux — is the bubble about to burst?</div>
+        <div class="thread-meta"><span>by MintMogul</span><span>in Trading Post</span><span>2 days ago</span></div>
+      </div>
+      <div class="thread-right">
+        <div class="reply-count">194</div>
+        <div class="reply-label">replies</div>
+      </div>
+    </div>
+
+    <div class="thread-row">
+      <div class="thread-num">04</div>
+      <div class="thread-av" style="background:rgba(148,100,246,0.2);color:#9464F6;">PX</div>
+      <div class="thread-body">
+        <div class="thread-title">Mega Tier list: every major Roblox game from 2020–2025 ranked</div>
+        <div class="thread-meta"><span>by PixelXtra</span><span>in Game Discussion</span><span>3 days ago</span></div>
+      </div>
+      <div class="thread-right">
+        <div class="reply-count">158</div>
+        <div class="reply-label">replies</div>
+      </div>
+    </div>
+
+    <div class="thread-row">
+      <div class="thread-num">05</div>
+      <div class="thread-av" style="background:rgba(236,72,153,0.2);color:#EC4899;">ZR</div>
+      <div class="thread-body">
+        <div class="thread-title">What was your first ever Roblox game? Let's get nostalgic 🧱</div>
+        <div class="thread-meta"><span>by ZoeRobloxian</span><span>in Off-Topic Lounge</span><span>4 days ago</span></div>
+      </div>
+      <div class="thread-right">
+        <div class="reply-count">923</div>
+        <div class="reply-label">replies</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-label">Why BloxTalk</div>
+  <h2>Built different</h2>
+  <p class="section-sub">Not just another Discord server. A real forum with real features.</p>
+
+  <div class="features-grid">
+    <div class="feat-card">
+      <span class="feat-icon">🏅</span>
+      <div class="feat-title">Rank & Reputation</div>
+      <div class="feat-desc">Earn badges and rank up from Noob to Legend based on post quality and community upvotes — not just post count.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔔</span>
+      <div class="feat-title">Smart Notifications</div>
+      <div class="feat-desc">Follow threads, categories, or specific users. Only get pinged for stuff you actually care about.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🛡️</span>
+      <div class="feat-title">Moderated & Safe</div>
+      <div class="feat-desc">Active human mods and community reporting keep the forum clean, fair, and friendly for all ages.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">🔎</span>
+      <div class="feat-title">Powerful Search</div>
+      <div class="feat-desc">Find any thread, post, or user in seconds. Filter by category, date, upvotes, or author.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">📌</span>
+      <div class="feat-title">Pinned Resources</div>
+      <div class="feat-desc">Every category has a curated wiki of pinned guides, tools, and tutorials maintained by top contributors.</div>
+    </div>
+    <div class="feat-card">
+      <span class="feat-icon">📱</span>
+      <div class="feat-title">Mobile-First Design</div>
+      <div class="feat-desc">Browse and post from any device. BloxTalk is fast, responsive, and works perfectly on your phone.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <div class="cta-content">
+    <h2>Ready to join the<br>conversation?</h2>
+    <p>Free forever. No ads. Just the community.</p>
+    <a href="#" class="btn btn-yellow btn-lg">Create your account</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="footer-brand">
+      <a href="#" class="logo">Blox<span>Talk</span></a>
+      <p>The independent community forum for Roblox players, developers, and fans worldwide.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Forum</h4>
+      <ul>
+        <li><a href="#">Game Discussion</a></li>
+        <li><a href="#">Dev Hub</a></li>
+        <li><a href="#">Trading Post</a></li>
+        <li><a href="#">Off-Topic Lounge</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="#">Leaderboard</a></li>
+        <li><a href="#">Weekly Digest</a></li>
+        <li><a href="#">Staff Blog</a></li>
+        <li><a href="#">Report a post</a></li>
+      </ul>
+    </div>
+    <div class="footer-links">
+      <h4>Company</h4>
+      <ul>
+        <li><a href="#">About us</a></li>
+        <li><a href="#">Rules & Guidelines</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 BloxTalk. All rights reserved.</p>
+    <p class="disclaimer">BloxTalk is not affiliated with or endorsed by Roblox Corporation.</p>
+  </div>
+</footer>
+
+</body>
+</html>
