@@ -3,166 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevBlox | Community Forum</title>
+    <title>Community Board | Roblox Developers</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        /* Roblox-inspired Font and Colors */
+        @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;900&display=swap');
         
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #0a0a0b;
+            font-family: 'Hanken Grotesk', sans-serif;
+            background-color: #1b1d1e; /* Specific Roblox Dark Theme Color */
             color: #ffffff;
-            scroll-behavior: smooth;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .forum-container {
+            background-color: #232527;
+            border: 1px solid #393b3d;
         }
 
-        .rbx-red { color: #f64141; }
-        .bg-rbx-red { background-color: #f64141; }
-
-        .hero-pattern {
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
-            background-size: 32px 32px;
+        .post-input {
+            background-color: #000000;
+            border: 1px solid #393b3d;
+            color: #ffffff;
         }
 
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .post-input:focus {
+            border-color: #00a2ff; /* Roblox Blue highlight */
+            outline: none;
         }
-        .post-animation { animation: slideIn 0.4s ease-out forwards; }
+
+        .btn-post {
+            background-color: #00a2ff;
+            transition: background 0.2s;
+        }
+
+        .btn-post:hover {
+            background-color: #0081cc;
+        }
+
+        .sidebar-box {
+            background-color: #232527;
+            border: 1px solid #393b3d;
+        }
     </style>
 </head>
-<body class="hero-pattern min-h-screen">
+<body class="min-h-screen">
 
-    <nav class="fixed w-full z-50 glass border-b border-white/5 px-6 py-4">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2 font-bold text-xl tracking-tighter">
-                <div class="w-8 h-8 bg-rbx-red rounded-lg flex items-center justify-center">
-                    <i data-lucide="message-square" class="w-5 h-5 text-white"></i>
+    <nav class="bg-[#232527] border-b border-[#393b3d] px-6 py-3 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-[#393b3d] rounded-md flex items-center justify-center">
+                    <i data-lucide="layout-grid" class="text-white w-6 h-6"></i>
                 </div>
-                DEV<span class="rbx-red">FORUM</span>
+                <span class="font-black text-xl tracking-tight uppercase">Dev<span class="text-[#00a2ff]">Forum</span></span>
             </div>
-            <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                System Ready
+            <div class="flex gap-4">
+                <i data-lucide="search" class="text-gray-400 w-5 h-5 cursor-pointer"></i>
+                <i data-lucide="bell" class="text-gray-400 w-5 h-5 cursor-pointer"></i>
+                <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
             </div>
         </div>
     </nav>
 
-    <main class="max-w-4xl mx-auto pt-32 px-6 pb-20">
+    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
         
-        <div class="glass p-8 rounded-[2.5rem] mb-12 border border-white/10 shadow-2xl">
-            <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4"></i> New Discussion
-            </h2>
-            <div class="space-y-4">
-                <input type="text" id="usernameInput" placeholder="Your Roblox Username..." 
-                    class="w-full bg-black/40 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-red-500 transition-all placeholder:text-gray-600">
-                
-                <textarea id="postInput" placeholder="What's happening in Studio?" rows="3"
-                    class="w-full bg-black/40 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-red-500 transition-all resize-none placeholder:text-gray-600"></textarea>
-                
-                <button onclick="addPost()" class="w-full bg-rbx-red hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20 flex items-center justify-center gap-2">
-                    <i data-lucide="send" class="w-4 h-4"></i> POST THREAD
-                </button>
+        <div class="hidden lg:block space-y-4">
+            <div class="sidebar-box p-4 rounded-lg">
+                <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Community Stats</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Total Threads</span>
+                        <span id="threadCount" class="font-bold">0</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-400">Users Online</span>
+                        <span class="text-green-500 font-bold">142</span>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar-box p-4 rounded-lg">
+                <p class="text-xs text-gray-500 leading-relaxed">
+                    This is a private community board for Roblox developers. Please follow the rules.
+                </p>
             </div>
         </div>
 
-        <div class="flex items-center justify-between mb-8">
-            <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-500">Recent Activity</h3>
-            <button onclick="clearAll()" class="text-[10px] font-bold text-gray-700 hover:text-red-500 transition-colors uppercase tracking-widest">Clear My Feed</button>
-        </div>
-
-        <div id="forumFeed" class="space-y-6">
+        <div class="lg:col-span-3 space-y-6">
+            
+            <div class="forum-container p-6 rounded-lg shadow-lg">
+                <div class="flex gap-4">
+                    <div class="w-12 h-12 bg-gray-700 rounded-md shrink-0"></div>
+                    <div class="flex-grow space-y-3">
+                        <input type="text" id="user" placeholder="Display Name..." 
+                               class="post-input w-full p-2 rounded text-sm font-bold">
+                        <textarea id="msg" placeholder="What are you working on?" 
+                                  class="post-input w-full p-3 rounded text-sm min-h-[80px]"></textarea>
+                        <div class="flex justify-between items-center">
+                            <div class="flex gap-2">
+                                <i data-lucide="image" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
+                                <i data-lucide="code" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
+                            </div>
+                            <button onclick="createPost()" class="btn-post px-6 py-2 rounded font-bold text-sm">
+                                Create Topic
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-    </main>
+
+            <div id="forumFeed" class="space-y-3">
+                </div>
+        </div>
+    </div>
 
     <script>
+        // Initialize Icons
         lucide.createIcons();
 
-        window.onload = function() {
-            renderPosts();
-        };
-
-        function addPost() {
-            const user = document.getElementById('usernameInput').value.trim();
-            const text = document.getElementById('postInput').value.trim();
-
-            if (!user || !text) {
-                alert("Please enter both a username and a message!");
-                return;
-            }
-
-            const posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
-            const newPost = {
-                id: Date.now(),
-                username: user,
-                content: text,
-                timestamp: new Date().toLocaleString()
-            };
-
-            posts.unshift(newPost);
-            localStorage.setItem('forum_posts', JSON.stringify(posts));
-            document.getElementById('postInput').value = '';
-            renderPosts();
-        }
-
-        function renderPosts() {
+        // Load Posts
+        function updateFeed() {
             const feed = document.getElementById('forumFeed');
-            const posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
+            const threads = JSON.parse(localStorage.getItem('rbx_threads') || '[]');
+            document.getElementById('threadCount').innerText = threads.length;
 
-            if (posts.length === 0) {
-                feed.innerHTML = `
-                    <div class="text-center py-20 glass rounded-[2rem] border-dashed border-white/10">
-                        <i data-lucide="inbox" class="w-12 h-12 text-gray-800 mx-auto mb-4"></i>
-                        <p class="text-gray-600 font-medium tracking-wide">The forum is empty. Start the first thread!</p>
-                    </div>
-                `;
-                lucide.createIcons();
+            if(threads.length === 0) {
+                feed.innerHTML = `<div class="text-center py-10 text-gray-600">No active discussions.</div>`;
                 return;
             }
 
-            feed.innerHTML = posts.map(post => `
-                <div class="glass p-6 rounded-3xl border border-white/5 hover:border-red-500/30 transition-all post-animation">
-                    <div class="flex justify-between items-start mb-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center font-bold text-sm shadow-lg uppercase">
-                                ${post.username.substring(0,1)}
-                            </div>
-                            <div>
-                                <p class="font-bold text-red-500">@${post.username}</p>
-                                <p class="text-[10px] text-gray-600 font-mono tracking-tighter">${post.timestamp}</p>
-                            </div>
+            feed.innerHTML = threads.map((t, i) => `
+                <div class="forum-container p-5 rounded-lg flex justify-between items-center group hover:bg-[#2a2c2e] transition-colors cursor-pointer">
+                    <div class="flex gap-4">
+                        <div class="w-10 h-10 bg-[#00a2ff] rounded-md flex items-center justify-center font-bold">
+                            ${t.user.charAt(0).toUpperCase()}
                         </div>
-                        <button onclick="deletePost(${post.id})" class="text-gray-800 hover:text-red-500 transition-colors">
-                            <i data-lucide="x" class="w-4 h-4"></i>
-                        </button>
+                        <div>
+                            <h4 class="font-bold text-[#00a2ff] hover:underline">${t.user}</h4>
+                            <p class="text-gray-300 text-sm mt-1">${t.content}</p>
+                            <span class="text-[10px] text-gray-500 mt-2 block">${t.time}</span>
+                        </div>
                     </div>
-                    <p class="text-gray-300 leading-relaxed whitespace-pre-wrap">${post.content}</p>
+                    <button onclick="removePost(${i})" class="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
                 </div>
             `).join('');
-            
             lucide.createIcons();
         }
 
-        function deletePost(id) {
-            let posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
-            posts = posts.filter(p => p.id !== id);
-            localStorage.setItem('forum_posts', JSON.stringify(posts));
-            renderPosts();
+        function createPost() {
+            const user = document.getElementById('user').value || "Guest Developer";
+            const content = document.getElementById('msg').value;
+
+            if(!content) return;
+
+            const threads = JSON.parse(localStorage.getItem('rbx_threads') || '[]');
+            threads.unshift({
+                user: user,
+                content: content,
+                time: new Date().toLocaleString()
+            });
+
+            localStorage.setItem('rbx_threads', JSON.stringify(threads));
+            document.getElementById('msg').value = '';
+            updateFeed();
         }
 
-        function clearAll() {
-            if(confirm("Clear your local feed?")) {
-                localStorage.removeItem('forum_posts');
-                renderPosts();
-            }
+        function removePost(index) {
+            const threads = JSON.parse(localStorage.getItem('rbx_threads') || '[]');
+            threads.splice(index, 1);
+            localStorage.setItem('rbx_threads', JSON.stringify(threads));
+            updateFeed();
         }
+
+        // Start
+        window.onload = updateFeed;
     </script>
 </body>
 </html>
