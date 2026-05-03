@@ -1,211 +1,168 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
-import { getFirestore, collection, addDoc, query, onSnapshot, serverTimestamp } from 'firebase/firestore';
-import { MessageSquare, Send, User, Clock, ShieldCheck, Box } from 'lucide-react';
-
-// Environment variables provided by the container
-const firebaseConfig = JSON.parse(__firebase_config);
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'roblox-forum-app';
-
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [newPost, setNewPost] = useState('');
-  const [username, setUsername] = useState('');
-  const [loading, setLoading] = useState(true);
-
-  // Rule 3: Auth Before Queries
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevBlox | Community Forum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0a0a0b;
+            color: #ffffff;
+            scroll-behavior: smooth;
         }
-      } catch (err) {
-        console.error("Auth failed", err);
-      }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, (currUser) => {
-      setUser(currUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
 
-  // Rule 1 & 2: Fetch Data
-  useEffect(() => {
-    if (!user) return;
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
 
-    // Path structure required by Rule 1
-    const forumCollection = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
-    
-    // Simple query (Rule 2: No complex ordering in query, we sort in JS)
-    const q = query(forumCollection);
-    
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedPosts = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      
-      // Sorting in memory to avoid needing indexes (Rule 2)
-      const sorted = fetchedPosts.sort((a, b) => {
-        const timeA = a.createdAt?.seconds || 0;
-        const timeB = b.createdAt?.seconds || 0;
-        return timeB - timeA;
-      });
-      
-      setPosts(sorted);
-    }, (error) => {
-      console.error("Firestore error:", error);
-    });
+        .rbx-red { color: #f64141; }
+        .bg-rbx-red { background-color: #f64141; }
 
-    return () => unsubscribe();
-  }, [user]);
+        .hero-pattern {
+            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 32px 32px;
+        }
 
-  const handlePost = async (e) => {
-    e.preventDefault();
-    if (!newPost.trim() || !user) return;
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .post-animation { animation: slideIn 0.4s ease-out forwards; }
+    </style>
+</head>
+<body class="hero-pattern min-h-screen">
 
-    const finalUsername = username.trim() || `Player_${user.uid.substring(0, 5)}`;
-    
-    try {
-      const forumCollection = collection(db, 'artifacts', appId, 'public', 'data', 'posts');
-      await addDoc(forumCollection, {
-        username: finalUsername,
-        content: newPost,
-        userId: user.uid,
-        createdAt: serverTimestamp()
-      });
-      setNewPost('');
-    } catch (err) {
-      console.error("Error adding post:", err);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0b] flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-red-600"></div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-[#0a0a0b] text-white font-sans selection:bg-red-500/30">
-      {/* Header */}
-      <nav className="border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="bg-red-600 p-1.5 rounded-lg shadow-[0_0_15px_rgba(220,38,38,0.3)]">
-              <Box className="w-5 h-5 text-white" />
-            </div>
-            <span className="font-black italic text-xl tracking-tighter">ROBLOX<span className="text-red-500">FORUM</span></span>
-          </div>
-          <div className="flex items-center gap-3 bg-white/5 px-3 py-1.5 rounded-full border border-white/10">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Live Server</span>
-          </div>
-        </div>
-      </nav>
-
-      <main className="max-w-4xl mx-auto px-6 py-10">
-        {/* Post Input Card */}
-        <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 mb-10 shadow-2xl">
-          <div className="flex items-center gap-2 mb-6">
-            <MessageSquare className="w-5 h-5 text-red-500" />
-            <h2 className="font-bold text-lg">Start a Discussion</h2>
-          </div>
-          
-          <form onSubmit={handlePost} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="relative">
-                <User className="absolute left-4 top-3.5 w-4 h-4 text-gray-500" />
-                <input 
-                  type="text" 
-                  placeholder="Your Roblox Username..."
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-11 pr-4 focus:outline-none focus:border-red-600 transition-colors placeholder:text-gray-600"
-                />
-              </div>
-            </div>
-            
-            <textarea 
-              placeholder="What's happening in Studio? Share a script, show a build, or ask a question..."
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 min-h-[120px] focus:outline-none focus:border-red-600 transition-colors resize-none placeholder:text-gray-600"
-            />
-            
-            <button 
-              type="submit"
-              disabled={!newPost.trim()}
-              className="w-full bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all transform active:scale-[0.98] shadow-lg shadow-red-600/20"
-            >
-              <Send className="w-4 h-4" /> POST TO FEED
-            </button>
-          </form>
-        </div>
-
-        {/* Discussion Feed */}
-        <div className="space-y-6">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-gray-500 text-xs font-black uppercase tracking-[0.2em]">Community Feed</h3>
-            <span className="text-gray-600 text-xs">{posts.length} Threads</span>
-          </div>
-
-          {posts.length === 0 ? (
-            <div className="text-center py-20 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
-              <p className="text-gray-500">The forum is quiet... be the first to post!</p>
-            </div>
-          ) : (
-            posts.map((post) => (
-              <div key={post.id} className="group bg-white/5 border border-white/5 rounded-3xl p-6 hover:bg-white/[0.07] hover:border-red-500/30 transition-all duration-300">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center font-bold text-sm shadow-lg">
-                      {post.username.substring(0, 1).toUpperCase()}
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-red-500">@{post.username}</span>
-                        {post.userId === user?.uid && (
-                          <span className="bg-white/10 text-[9px] px-2 py-0.5 rounded-full uppercase font-bold text-gray-400">You</span>
-                        )}
-                      </div>
-                      <div className="flex items-center gap-1.5 text-gray-500 text-[10px]">
-                        <Clock className="w-3 h-3" />
-                        <span>{post.createdAt ? new Date(post.createdAt.seconds * 1000).toLocaleString() : 'Just now'}</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ShieldCheck className="w-4 h-4 text-gray-700" />
+    <nav class="fixed w-full z-50 glass border-b border-white/5 px-6 py-4">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 font-bold text-xl tracking-tighter">
+                <div class="w-8 h-8 bg-rbx-red rounded-lg flex items-center justify-center">
+                    <i data-lucide="message-square" class="w-5 h-5 text-white"></i>
                 </div>
-                <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{post.content}</p>
-                <div className="mt-6 flex gap-4">
-                   <button className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-red-500 transition-colors">Reply</button>
-                   <button className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-red-500 transition-colors">Upvote</button>
-                   <button className="text-[10px] font-bold text-gray-500 uppercase tracking-widest hover:text-red-500 transition-colors">Share</button>
-                </div>
-              </div>
-            ))
-          )}
+                DEV<span class="rbx-red">FORUM</span>
+            </div>
+            <div class="flex items-center gap-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                System Ready
+            </div>
         </div>
-      </main>
+    </nav>
 
-      <footer className="py-20 text-center border-t border-white/5 mt-20">
-        <p className="text-gray-600 text-[10px] font-black uppercase tracking-[0.4em]">
-          Powered by DevBlox Infrastructure • Roblox is a trademark of Roblox Corp.
-        </p>
-      </footer>
-    </div>
-  );
-}
+    <main class="max-w-4xl mx-auto pt-32 px-6 pb-20">
+        
+        <div class="glass p-8 rounded-[2.5rem] mb-12 border border-white/10 shadow-2xl">
+            <h2 class="text-sm font-bold uppercase tracking-[0.2em] text-gray-500 mb-6 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i> New Discussion
+            </h2>
+            <div class="space-y-4">
+                <input type="text" id="usernameInput" placeholder="Your Roblox Username..." 
+                    class="w-full bg-black/40 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-red-500 transition-all placeholder:text-gray-600">
+                
+                <textarea id="postInput" placeholder="What's happening in Studio?" rows="3"
+                    class="w-full bg-black/40 border border-white/10 rounded-xl p-4 focus:outline-none focus:border-red-500 transition-all resize-none placeholder:text-gray-600"></textarea>
+                
+                <button onclick="addPost()" class="w-full bg-rbx-red hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-all active:scale-[0.98] shadow-lg shadow-red-600/20 flex items-center justify-center gap-2">
+                    <i data-lucide="send" class="w-4 h-4"></i> POST THREAD
+                </button>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-8">
+            <h3 class="text-xs font-black uppercase tracking-[0.3em] text-gray-500">Recent Activity</h3>
+            <button onclick="clearAll()" class="text-[10px] font-bold text-gray-700 hover:text-red-500 transition-colors uppercase tracking-widest">Clear My Feed</button>
+        </div>
+
+        <div id="forumFeed" class="space-y-6">
+            </div>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        window.onload = function() {
+            renderPosts();
+        };
+
+        function addPost() {
+            const user = document.getElementById('usernameInput').value.trim();
+            const text = document.getElementById('postInput').value.trim();
+
+            if (!user || !text) {
+                alert("Please enter both a username and a message!");
+                return;
+            }
+
+            const posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
+            const newPost = {
+                id: Date.now(),
+                username: user,
+                content: text,
+                timestamp: new Date().toLocaleString()
+            };
+
+            posts.unshift(newPost);
+            localStorage.setItem('forum_posts', JSON.stringify(posts));
+            document.getElementById('postInput').value = '';
+            renderPosts();
+        }
+
+        function renderPosts() {
+            const feed = document.getElementById('forumFeed');
+            const posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
+
+            if (posts.length === 0) {
+                feed.innerHTML = `
+                    <div class="text-center py-20 glass rounded-[2rem] border-dashed border-white/10">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-800 mx-auto mb-4"></i>
+                        <p class="text-gray-600 font-medium tracking-wide">The forum is empty. Start the first thread!</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            feed.innerHTML = posts.map(post => `
+                <div class="glass p-6 rounded-3xl border border-white/5 hover:border-red-500/30 transition-all post-animation">
+                    <div class="flex justify-between items-start mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-orange-600 rounded-xl flex items-center justify-center font-bold text-sm shadow-lg uppercase">
+                                ${post.username.substring(0,1)}
+                            </div>
+                            <div>
+                                <p class="font-bold text-red-500">@${post.username}</p>
+                                <p class="text-[10px] text-gray-600 font-mono tracking-tighter">${post.timestamp}</p>
+                            </div>
+                        </div>
+                        <button onclick="deletePost(${post.id})" class="text-gray-800 hover:text-red-500 transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-300 leading-relaxed whitespace-pre-wrap">${post.content}</p>
+                </div>
+            `).join('');
+            
+            lucide.createIcons();
+        }
+
+        function deletePost(id) {
+            let posts = JSON.parse(localStorage.getItem('forum_posts') || '[]');
+            posts = posts.filter(p => p.id !== id);
+            localStorage.setItem('forum_posts', JSON.stringify(posts));
+            renderPosts();
+        }
+
+        function clearAll() {
+            if(confirm("Clear your local feed?")) {
+                localStorage.removeItem('forum_posts');
+                renderPosts();
+            }
+        }
+    </script>
+</body>
+</html>
