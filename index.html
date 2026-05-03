@@ -7,120 +7,152 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Roblox-inspired Font and Colors */
         @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;700;900&display=swap');
         
         body {
             font-family: 'Hanken Grotesk', sans-serif;
-            background-color: #1b1d1e; /* Specific Roblox Dark Theme Color */
+            background-color: #1b1d1e;
             color: #ffffff;
         }
 
-        .forum-container {
-            background-color: #232527;
-            border: 1px solid #393b3d;
-        }
-
-        .post-input {
-            background-color: #000000;
-            border: 1px solid #393b3d;
-            color: #ffffff;
-        }
-
-        .post-input:focus {
-            border-color: #00a2ff; /* Roblox Blue highlight */
-            outline: none;
-        }
-
-        .btn-post {
-            background-color: #00a2ff;
-            transition: background 0.2s;
-        }
-
-        .btn-post:hover {
-            background-color: #0081cc;
-        }
-
-        .sidebar-box {
-            background-color: #232527;
-            border: 1px solid #393b3d;
+        .forum-container { background-color: #232527; border: 1px solid #393b3d; }
+        .post-input { background-color: #000000; border: 1px solid #393b3d; color: #ffffff; }
+        .post-input:focus { border-color: #00a2ff; outline: none; }
+        .btn-post { background-color: #00a2ff; transition: background 0.2s; }
+        .btn-post:hover { background-color: #0081cc; }
+        .sidebar-box { background-color: #232527; border: 1px solid #393b3d; }
+        
+        /* Modal Style */
+        #authOverlay {
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
         }
     </style>
 </head>
 <body class="min-h-screen">
 
-    <nav class="bg-[#232527] border-b border-[#393b3d] px-6 py-3 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="w-10 h-10 bg-[#393b3d] rounded-md flex items-center justify-center">
-                    <i data-lucide="layout-grid" class="text-white w-6 h-6"></i>
+    <div id="authOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div class="forum-container w-full max-w-md p-8 rounded-xl shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-[#393b3d] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="shield-check" class="text-[#00a2ff] w-10 h-10"></i>
                 </div>
-                <span class="font-black text-xl tracking-tight uppercase">Dev<span class="text-[#00a2ff]">Forum</span></span>
+                <h2 class="text-2xl font-black uppercase tracking-tight">Access <span class="text-[#00a2ff]">DevForum</span></h2>
+                <p class="text-gray-500 text-sm mt-2">Sign up with a username to join the board</p>
             </div>
-            <div class="flex gap-4">
-                <i data-lucide="search" class="text-gray-400 w-5 h-5 cursor-pointer"></i>
-                <i data-lucide="bell" class="text-gray-400 w-5 h-5 cursor-pointer"></i>
-                <div class="w-8 h-8 bg-gray-600 rounded-full"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-500 uppercase">Roblox Username</label>
+                    <input type="text" id="authUsername" placeholder="e.g. Builderman" 
+                           class="post-input w-full p-3 rounded mt-1 font-bold">
+                </div>
+                <button onclick="handleSignUp()" class="btn-post w-full py-3 rounded font-black uppercase tracking-widest text-sm shadow-lg shadow-blue-500/20">
+                    Enter Community
+                </button>
             </div>
         </div>
-    </nav>
+    </div>
 
-    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
-        
-        <div class="hidden lg:block space-y-4">
-            <div class="sidebar-box p-4 rounded-lg">
-                <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Community Stats</h3>
-                <div class="space-y-2">
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-400">Total Threads</span>
-                        <span id="threadCount" class="font-bold">0</span>
+    <div id="mainContent" class="hidden">
+        <nav class="bg-[#232527] border-b border-[#393b3d] px-6 py-3 sticky top-0 z-50">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-[#393b3d] rounded-md flex items-center justify-center">
+                        <i data-lucide="layout-grid" class="text-white w-6 h-6"></i>
                     </div>
-                    <div class="flex justify-between text-sm">
-                        <span class="text-gray-400">Users Online</span>
-                        <span class="text-green-500 font-bold">142</span>
+                    <span class="font-black text-xl tracking-tight uppercase">Dev<span class="text-[#00a2ff]">Forum</span></span>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-3">
+                        <span id="currentUser" class="text-sm font-bold text-gray-400"></span>
+                        <button onclick="logout()" class="text-xs text-red-500 font-bold hover:underline">Logout</button>
+                    </div>
+                    <div class="flex gap-4">
+                        <i data-lucide="bell" class="text-gray-400 w-5 h-5 cursor-pointer"></i>
+                        <div class="w-8 h-8 bg-[#00a2ff] rounded-full flex items-center justify-center font-bold text-xs" id="userAvatar">?</div>
                     </div>
                 </div>
             </div>
-            <div class="sidebar-box p-4 rounded-lg">
-                <p class="text-xs text-gray-500 leading-relaxed">
-                    This is a private community board for Roblox developers. Please follow the rules.
-                </p>
-            </div>
-        </div>
+        </nav>
 
-        <div class="lg:col-span-3 space-y-6">
-            
-            <div class="forum-container p-6 rounded-lg shadow-lg">
-                <div class="flex gap-4">
-                    <div class="w-12 h-12 bg-gray-700 rounded-md shrink-0"></div>
-                    <div class="flex-grow space-y-3">
-                        <input type="text" id="user" placeholder="Display Name..." 
-                               class="post-input w-full p-2 rounded text-sm font-bold">
-                        <textarea id="msg" placeholder="What are you working on?" 
-                                  class="post-input w-full p-3 rounded text-sm min-h-[80px]"></textarea>
-                        <div class="flex justify-between items-center">
-                            <div class="flex gap-2">
-                                <i data-lucide="image" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
-                                <i data-lucide="code" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
-                            </div>
-                            <button onclick="createPost()" class="btn-post px-6 py-2 rounded font-bold text-sm">
-                                Create Topic
-                            </button>
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6 p-6">
+            <div class="hidden lg:block space-y-4">
+                <div class="sidebar-box p-4 rounded-lg text-center py-8">
+                    <div class="w-20 h-20 bg-gray-800 rounded-2xl mx-auto mb-4 flex items-center justify-center border border-white/5">
+                        <i data-lucide="user" class="w-10 h-10 text-gray-600"></i>
+                    </div>
+                    <h3 id="sidebarUser" class="font-black text-lg">Username</h3>
+                    <p class="text-xs text-[#00a2ff] font-bold">Developer</p>
+                </div>
+
+                <div class="sidebar-box p-4 rounded-lg">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Community Stats</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Threads</span>
+                            <span id="threadCount" class="font-bold">0</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="forumFeed" class="space-y-3">
+            <div class="lg:col-span-3 space-y-6">
+                <div class="forum-container p-6 rounded-lg shadow-lg">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 bg-[#00a2ff] rounded-md shrink-0 flex items-center justify-center font-black" id="postAvatar">?</div>
+                        <div class="flex-grow space-y-3">
+                            <textarea id="msg" placeholder="What are you working on?" 
+                                      class="post-input w-full p-3 rounded text-sm min-h-[80px]"></textarea>
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <i data-lucide="image" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
+                                    <i data-lucide="code" class="text-gray-500 w-5 h-5 cursor-pointer"></i>
+                                </div>
+                                <button onclick="createPost()" class="btn-post px-6 py-2 rounded font-bold text-sm">
+                                    Create Topic
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <div id="forumFeed" class="space-y-3"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Initialize Icons
         lucide.createIcons();
 
-        // Load Posts
+        // --- AUTH LOGIC ---
+        function checkAuth() {
+            const loggedInUser = localStorage.getItem('rbx_user');
+            if (loggedInUser) {
+                document.getElementById('authOverlay').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
+                document.getElementById('currentUser').innerText = loggedInUser;
+                document.getElementById('sidebarUser').innerText = loggedInUser;
+                document.getElementById('userAvatar').innerText = loggedInUser.charAt(0).toUpperCase();
+                document.getElementById('postAvatar').innerText = loggedInUser.charAt(0).toUpperCase();
+                updateFeed();
+            }
+        }
+
+        function handleSignUp() {
+            const user = document.getElementById('authUsername').value.trim();
+            if (user.length < 3) return alert("Username too short!");
+            
+            localStorage.setItem('rbx_user', user);
+            checkAuth();
+        }
+
+        function logout() {
+            localStorage.removeItem('rbx_user');
+            location.reload();
+        }
+
+        // --- FORUM LOGIC ---
         function updateFeed() {
             const feed = document.getElementById('forumFeed');
             const threads = JSON.parse(localStorage.getItem('rbx_threads') || '[]');
@@ -132,7 +164,7 @@
             }
 
             feed.innerHTML = threads.map((t, i) => `
-                <div class="forum-container p-5 rounded-lg flex justify-between items-center group hover:bg-[#2a2c2e] transition-colors cursor-pointer">
+                <div class="forum-container p-5 rounded-lg flex justify-between items-center group hover:bg-[#2a2c2e] transition-colors cursor-pointer animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div class="flex gap-4">
                         <div class="w-10 h-10 bg-[#00a2ff] rounded-md flex items-center justify-center font-bold">
                             ${t.user.charAt(0).toUpperCase()}
@@ -143,7 +175,7 @@
                             <span class="text-[10px] text-gray-500 mt-2 block">${t.time}</span>
                         </div>
                     </div>
-                    <button onclick="removePost(${i})" class="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500">
+                    <button onclick="removePost(${i})" class="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500 transition-opacity">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -152,7 +184,7 @@
         }
 
         function createPost() {
-            const user = document.getElementById('user').value || "Guest Developer";
+            const user = localStorage.getItem('rbx_user') || "Guest";
             const content = document.getElementById('msg').value;
 
             if(!content) return;
@@ -176,8 +208,7 @@
             updateFeed();
         }
 
-        // Start
-        window.onload = updateFeed;
+        window.onload = checkAuth;
     </script>
 </body>
 </html>
